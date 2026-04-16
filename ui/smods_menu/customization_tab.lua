@@ -1,3 +1,36 @@
+local function mp_is_in_active_match()
+	return MP.LOBBY
+		and MP.LOBBY.code
+		and G.STAGE
+		and G.STAGES
+		and G.STAGE ~= G.STAGES.MAIN_MENU
+end
+
+local function mp_settings_locked_message()
+	MP.UI.UTILS.overlay_message("Multiplayer profile settings cannot be changed during a match.")
+end
+
+local function guarded_save_preview()
+	if mp_is_in_active_match() then
+		mp_settings_locked_message()
+		MP.PREVIEW.text = SMODS.Mods["Multiplayer"].config.preview.text or ""
+		MP.PREVIEW.button = SMODS.Mods["Multiplayer"].config.preview.button or ""
+		return
+	end
+
+	MP.UTILS.save_preview(MP.PREVIEW)
+end
+
+local function guarded_save_username()
+	if mp_is_in_active_match() then
+		mp_settings_locked_message()
+		MP.LOBBY.username = MP.UTILS.get_username()
+		return
+	end
+
+	MP.UTILS.save_username(MP.LOBBY.username)
+end
+
 function MP.UI.create_customization_tab()
 	local blind_anim = AnimatedSprite(
 		0,
@@ -11,8 +44,12 @@ function MP.UI.create_customization_tab()
 		{ shader = "dissolve", shadow_height = 0.05 },
 		{ shader = "dissolve" },
 	})
+
 	MP.PREVIEW.text = SMODS.Mods["Multiplayer"].config.preview.text or ""
 	MP.PREVIEW.button = SMODS.Mods["Multiplayer"].config.preview.button or ""
+
+	local settings_locked = mp_is_in_active_match()
+
 	local ret = {
 		n = G.UIT.ROOT,
 		config = {
@@ -23,7 +60,25 @@ function MP.UI.create_customization_tab()
 			colour = G.C.BLACK,
 		},
 		nodes = {
-			MP.INTEGRATIONS.Preview and {
+			settings_locked and {
+				n = G.UIT.R,
+				config = {
+					padding = 0.2,
+					align = "cm",
+				},
+				nodes = {
+					{
+						n = G.UIT.T,
+						config = {
+							scale = 0.45,
+							text = "Profile settings are locked during a match",
+							colour = G.C.RED,
+						},
+					},
+				},
+			} or nil,
+
+			MP.INTEGRATIONS.Preview and not settings_locked and {
 				n = G.UIT.R,
 				config = {
 					padding = 0.10,
@@ -41,7 +96,8 @@ function MP.UI.create_customization_tab()
 					},
 				},
 			} or nil,
-			MP.INTEGRATIONS.Preview and {
+
+			MP.INTEGRATIONS.Preview and not settings_locked and {
 				n = G.UIT.R,
 				config = {
 					padding = 0,
@@ -59,7 +115,8 @@ function MP.UI.create_customization_tab()
 					},
 				},
 			} or nil,
-			MP.INTEGRATIONS.Preview
+
+			MP.INTEGRATIONS.Preview and not settings_locked
 					and {
 						n = G.UIT.R,
 						config = {
@@ -80,7 +137,7 @@ function MP.UI.create_customization_tab()
 								extended_corpus = true,
 								keyboard_offset = -3,
 								callback = function(val)
-									MP.UTILS.save_preview(MP.PREVIEW)
+									guarded_save_preview()
 								end,
 							}),
 							create_text_input({
@@ -95,13 +152,14 @@ function MP.UI.create_customization_tab()
 								extended_corpus = true,
 								keyboard_offset = -3,
 								callback = function(val)
-									MP.UTILS.save_preview(MP.PREVIEW)
+									guarded_save_preview()
 								end,
 							}),
 						},
 					}
 				or nil,
-			{
+
+			not settings_locked and {
 				n = G.UIT.R,
 				config = {
 					padding = 0.5,
@@ -127,7 +185,7 @@ function MP.UI.create_customization_tab()
 						extended_corpus = true,
 						keyboard_offset = -3,
 						callback = function(val)
-							MP.UTILS.save_username(MP.LOBBY.username)
+							guarded_save_username()
 						end,
 					}),
 					{
@@ -139,8 +197,9 @@ function MP.UI.create_customization_tab()
 						},
 					},
 				},
-			},
-			{
+			} or nil,
+
+			not settings_locked and {
 				n = G.UIT.R,
 				config = {
 					padding = 0.1,
@@ -200,7 +259,7 @@ function MP.UI.create_customization_tab()
 						},
 					},
 				},
-			},
+			} or nil,
 		},
 	}
 	return ret

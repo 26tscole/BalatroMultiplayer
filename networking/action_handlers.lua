@@ -1211,6 +1211,11 @@ function Game:update(dt)
 			end
 
 			local parsedAction = json.decode(msg)
+			if type(parsedAction) ~= "table" or type(parsedAction.action) ~= "string" then
+				sendWarnMessage("Received malformed network packet", "MULTIPLAYER")
+				sendTraceMessage(string.format("Malformed packet payload: %s", tostring(msg)), "MULTIPLAYER")
+				goto continue
+			end
 
 			if not ((parsedAction.action == "keepAlive") or (parsedAction.action == "keepAliveAck")) then
 				local log = string.format("Client got %s message: ", parsedAction.action)
@@ -1329,6 +1334,7 @@ function Game:update(dt)
 			elseif parsedAction.action == "keepAlive" then
 				action_keep_alive()
 			end
+			::continue::
 		end
 	until not msg
 end

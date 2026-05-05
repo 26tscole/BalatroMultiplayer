@@ -705,11 +705,16 @@ function G.FUNCS.load_end_game_jokers()
 			0,
 			5 * G.CARD_W,
 			G.CARD_H,
-			{ card_limit = G.GAME.starting_params.joker_slots, type = "joker", highlight_limit = 1 }
+			{ card_limit = G.GAME.starting_params.joker_slots, type = "joker", highlight_limit = 0 }
 		)
 		return
 	end
 
+	if MP.end_game_jokers.cards then
+		for _, card in pairs(MP.end_game_jokers.cards) do
+			card.mp_end_game_display = true
+		end
+	end
 	-- Log the jokers
 	if MP.end_game_jokers.cards then
 		local jokers_str = ""

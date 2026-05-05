@@ -35,6 +35,48 @@ local hasGivenUp = false -- true after all reconnect attempts failed
 local networkToUiChannel = love.thread.getChannel("networkToUi")
 local uiToNetworkChannel = love.thread.getChannel("uiToNetwork")
 
+-- Outbound queue for nonblocking socket writes.
+-- send() can partially write, so we must retry the remaining bytes.
+local outboundQueue = {}
+local outboundOffset = 1
+
+local function queueOutboundMessage(msg)
+	if msg and msg ~= "" then table.insert(outboundQueue, msg) end
+end
+
+local function flushOutboundQueue(maxMessagesPerCycle)
+	if not Networking.Client or isSocketClosed then return end
+
+	local sentMessages = 0
+	local maxMessages = maxMessagesPerCycle or 25
+
+	while #outboundQueue > 0 and sentMessages < maxMessages do
+		local currentMsg = outboundQueue[1]
+		local remaining = string.sub(currentMsg, outboundOffset)
+		local bytesSent, err, partialSent = Networking.Client:send(remaining)
+
+		if bytesSent then
+			outboundOffset = outboundOffset + bytesSent
+		elseif err == "timeout" then
+			if partialSent and partialSent > 0 then
+				outboundOffset = outboundOffset + partialSent
+			end
+			break
+		else
+			if err ~= "wantwrite" then
+				SEND_THREAD_DEBUG_MESSAGE(string.format("Socket send error: %s", tostring(err)))
+			end
+			break
+		end
+
+		if outboundOffset > #currentMsg then
+			table.remove(outboundQueue, 1)
+			outboundOffset = 1
+			sentMessages = sentMessages + 1
+		end
+	end
+end
+
 -- Reconnection settings
 local maxReconnectAttempts = 3
 local reconnectDelays = { 2, 4, 8 } -- seconds, exponential backoff
@@ -64,6 +106,8 @@ function Networking.connect()
 	else
 		isSocketClosed = false
 		hasGivenUp = false
+		outboundQueue = {}
+		outboundOffset = 1
 	end
 
 	Networking.Client:settimeout(0)
@@ -103,13 +147,15 @@ local mainThreadMessageQueue = function()
 					hasGivenUp = false
 					Networking.connect()
 				else
-					Networking.Client:send(msg .. "\n")
+					queueOutboundMessage(msg .. "\n")
 				end
 			else
 				-- If there are no more messages, yield
 				coroutine.yield()
 			end
 		end
+
+		flushOutboundQueue(requestsPerCycle)
 
 		coroutine.yield()
 	end
@@ -153,7 +199,7 @@ local networkPacketQueue = function()
 					-- Respond to server keepAlive directly on the socket
 					-- to avoid latency from routing through the UI thread
 					if string.find(data, '"keepAlive"') and not string.find(data, 'Ack') then
-						Networking.Client:send('{"action":"keepAliveAck"}\n')
+						queueOutboundMessage('{"action":"keepAliveAck"}\n')
 					end
 
 					-- Send the string as is to the main thread
@@ -192,6 +238,7 @@ local networkCoroutine = coroutine.create(networkPacketQueue)
 while true do
 	coroutine.resume(mainThreadCoroutine)
 	coroutine.resume(networkCoroutine)
+	flushOutboundQueue(25)
 
 	-- Run Timer
 	if not isSocketClosed and coroutine.status(timerCoroutine) ~= "dead" then

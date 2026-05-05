@@ -13,6 +13,15 @@ function G.FUNCS.bmp_github(e)
 end
 
 function G.FUNCS.change_blind_col(args) -- all we're doing is just saving + redefining the ui elements here
+	if MP.LOBBY
+		and MP.LOBBY.code
+		and G.STAGE
+		and G.STAGES
+		and G.STAGE ~= G.STAGES.MAIN_MENU then
+		MP.UI.UTILS.overlay_message("Multiplayer profile settings cannot be changed during a match.")
+		return
+	end
+
 	MP.UTILS.save_blind_col(args.to_val)
 	MP.LOBBY.blind_col = args.to_val
 	local sprite = G.OVERLAY_MENU:get_UIE_by_ID("blind_col_changer_sprite")
@@ -37,6 +46,15 @@ function G.FUNCS.change_blind_col(args) -- all we're doing is just saving + rede
 end
 
 function G.FUNCS.mp_change_timersfx(args)
+	if MP.LOBBY
+		and MP.LOBBY.code
+		and G.STAGE
+		and G.STAGES
+		and G.STAGE ~= G.STAGES.MAIN_MENU then
+		MP.UI.UTILS.overlay_message("Multiplayer settings cannot be changed during a match.")
+		return
+	end
+
 	SMODS.Mods["Multiplayer"].config.timersfx = args.to_key
-	SMODS.save_mod_config(SMODS.Mods["Multiplayer"]) -- probably unnecessary?
+	SMODS.save_mod_config(SMODS.Mods["Multiplayer"])
 end

@@ -1,11 +1,24 @@
 local function create_player_info_row(player, player_type, text_scale)
 	if not player or not player.username then return nil end
 
+
+	local role_label = ""
+		if player_type == "host" then
+			role_label = " (Host)"
+		elseif player_type == "guest" then
+			role_label = " (Guest)"
+		end
+
+
 	return MP.UI.UTILS.create_row({ padding = 0.1, align = "cm" }, {
 		MP.UI.UTILS.create_text_node(nil, {
 			ref_table = player,
 			ref_value = "username",
 			scale = text_scale * 0.8,
+			colour = G.C.UI.TEXT_LIGHT,
+		}),
+		MP.UI.UTILS.create_text_node(role_label, {
+			scale = text_scale * 0.6,
 			colour = G.C.UI.TEXT_LIGHT,
 		}),
 		MP.UI.UTILS.create_blank(0.1, 0.1),

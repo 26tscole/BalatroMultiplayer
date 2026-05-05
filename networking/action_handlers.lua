@@ -58,6 +58,7 @@ local function action_joinedLobby(code, type, token)
 	lastLobbyCode = code
 	MP.ACTIONS.sync_client()
 	MP.ACTIONS.lobby_info()
+	MP.ACTIONS.lobby_info()
 	MP.UI.update_connection_status()
 end
 
@@ -179,6 +180,12 @@ local function action_lobbyInfo(host, hostHash, hostCached, guest, guestHash, gu
 	MP.LOBBY.ready_to_start = guest ~= nil and guestReady
 
 	if MP.LOBBY.is_host then MP.ACTIONS.lobby_options() end
+
+	-- Reinforce: If we have a code and no guest yet, we are definitely the host
+	if MP.LOBBY.code and not MP.LOBBY.guest.username and not MP.LOBBY.is_host then
+		MP.LOBBY.is_host = true
+		MP.ACTIONS.lobby_options()
+	end
 
 	if G.STAGE == G.STAGES.MAIN_MENU then MP.ACTIONS.update_player_usernames() end
 end

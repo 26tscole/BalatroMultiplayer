@@ -112,6 +112,26 @@ function Game:update(dt)
 			handle_reconnect_timeout("Reconnection failed.\nReturning to main menu.")
 		end
 	end
+
+	if MP.LOBBY.code and MP.is_pvp_boss() and not MP.GAME.pvp_blind_started then
+
+			-- Check if opponent is already in PvP blind (has "playing" in their location)
+			if MP.GAME.enemy and MP.GAME.enemy.location and string.find(MP.GAME.enemy.location, "playing") then
+				sendDebugMessage("Auto-detected stuck outside PvP blind, recovering...", "MULTIPLAYER")
+
+				-- Trigger the same unstuck logic that the button uses
+				if G.FUNCS.mp_unstuck_blind then
+					G.FUNCS.mp_unstuck_blind()
+				end
+			end
+		end
+		
+	-- Also reset the flag when leaving PvP state
+	if MP.LOBBY.code and not MP.is_pvp_boss() and MP.GAME.pvp_blind_started then
+		MP.GAME.pvp_blind_started = false
+	end
+
+
 	return _disconnect_gupdate(self, dt)
 end
 
@@ -250,6 +270,12 @@ local function action_start_blind()
 	MP.GAME.ready_blind = false
 	MP.GAME.timer_started = false
 	MP.GAME.timer = MP.LOBBY.config.timer_base_seconds
+	MP.GAME.pvp_blind_started = true 
+
+	if MP.GAME.stuck_outside_pvp then
+		MP.GAME.stuck_outside_pvp = nil
+	end
+	
 	MP.UI.start_pvp_countdown(begin_pvp_blind)
 end
 

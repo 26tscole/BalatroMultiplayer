@@ -97,18 +97,34 @@ function G.FUNCS.toggle_players_jokers()
 	if MP.end_game_jokers_text == localize("k_enemy_jokers") then
 		local your_jokers_save = copy_table(G.jokers:save())
 		MP.end_game_jokers:load(your_jokers_save)
+
+		if MP.end_game_jokers.cards then
+			for _, card in pairs(MP.end_game_jokers.cards) do
+				card.mp_end_game_display = nil
+			end
+		end
+
 		MP.end_game_jokers_text = localize("k_your_jokers")
 	else
 		if MP.end_game_jokers_received then
 			G.FUNCS.load_end_game_jokers()
+
+			if MP.end_game_jokers.cards then
+				for _, card in pairs(MP.end_game_jokers.cards) do
+					card.mp_end_game_display = true
+					card.added_to_deck = false
+				end
+			end
 		else
-			if MP.end_game_jokers.cards then remove_all(MP.end_game_jokers.cards) end
+			if MP.end_game_jokers.cards then
+				remove_all(MP.end_game_jokers.cards)
+			end
 			MP.end_game_jokers.cards = {}
 		end
+
 		MP.end_game_jokers_text = localize("k_enemy_jokers")
 	end
 end
-
 function G.FUNCS.view_nemesis_deck()
 	G.SETTINGS.paused = true
 	if G.deck_preview then

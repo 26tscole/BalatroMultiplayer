@@ -14,13 +14,28 @@ end
 
 local sell_card_ref = Card.sell_card
 function Card:sell_card()
+	if self.mp_end_game_display then
+		return
+	end
+
 	if self.ability and self.ability.name then
 		sendTraceMessage(
 			string.format("Client sent message: action:soldCard,card:%s", self.ability.name),
 			"MULTIPLAYER"
 		)
 	end
+
 	return sell_card_ref(self)
+end
+
+
+local can_sell_ref = Card.can_sell
+function Card:can_sell(...)
+    if self.mp_end_game_display then
+        return false
+    end
+
+    return can_sell_ref(self, ...)
 end
 
 local reroll_shop_ref = G.FUNCS.reroll_shop
@@ -30,7 +45,6 @@ function G.FUNCS.reroll_shop(e)
 		"MULTIPLAYER"
 	)
 
-	-- Update reroll stats if in a multiplayer game
 	if MP.LOBBY.code and MP.GAME.stats then
 		MP.GAME.stats.reroll_count = MP.GAME.stats.reroll_count + 1
 		MP.GAME.stats.reroll_cost_total = MP.GAME.stats.reroll_cost_total + G.GAME.current_round.reroll_cost
@@ -42,12 +56,14 @@ end
 local buy_from_shop_ref = G.FUNCS.buy_from_shop
 function G.FUNCS.buy_from_shop(e)
 	local c1 = e.config.ref_table
+
 	if c1 and c1:is(Card) then
 		sendTraceMessage(
 			string.format("Client sent message: action:boughtCardFromShop,card:%s,cost:%s", c1.ability.name, c1.cost),
 			"MULTIPLAYER"
 		)
 	end
+
 	return buy_from_shop_ref(e)
 end
 
@@ -59,6 +75,7 @@ function G.FUNCS.use_card(e, mute, nosave)
 			"MULTIPLAYER"
 		)
 	end
+
 	return use_card_ref(e, mute, nosave)
 end
 
@@ -69,5 +86,6 @@ G.FUNCS.evaluate_round = function()
 		G.after_pvp = nil
 		SMODS.calculate_context({ mp_end_of_pvp = true })
 	end
+
 	evaluate_round_ref()
 end

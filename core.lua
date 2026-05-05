@@ -230,6 +230,7 @@ function MP.reset_game_states()
 		ce_cache = false,
 		furthest_blind = 0,
 		pvp_blind_started = false,
+		pvp_unstuck_attempted = false,
 		pincher_index = -3,
 		pincher_unlock = false,
 		asteroids = 0,

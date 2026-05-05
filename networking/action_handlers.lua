@@ -113,24 +113,34 @@ function Game:update(dt)
 		end
 	end
 
-	if MP.LOBBY.code and MP.is_pvp_boss() and not MP.GAME.pvp_blind_started then
-
-			-- Check if opponent is already in PvP blind (has "playing" in their location)
-			if MP.GAME.enemy and MP.GAME.enemy.location and string.find(MP.GAME.enemy.location, "playing") then
-				sendDebugMessage("Auto-detected stuck outside PvP blind, recovering...", "MULTIPLAYER")
-
-				-- Trigger the same unstuck logic that the button uses
-				if G.FUNCS.mp_unstuck_blind then
-					G.FUNCS.mp_unstuck_blind()
-				end
-			end
+	-- Auto-unstuck: if the enemy is already inside the PvP blind but we aren't,
+	-- force the same transition that the settings button does.
+	-- Uses actual game state (not a message-received flag) so it covers every
+	-- scenario that leaves the player stranded outside the blind.
+	if MP.LOBBY.code
+		and MP.GAME.next_blind_context    -- we know which blind to enter
+		and not MP.is_pvp_boss()          -- we are NOT inside it yet
+		and not MP.GAME.pvp_unstuck_attempted  -- only try once per round
+		and MP.GAME.enemy
+		and MP.GAME.enemy.location
+		and string.find(MP.GAME.enemy.location, "playing")
+	then
+		sendDebugMessage("Auto-detected stuck outside PvP blind, recovering...", "MULTIPLAYER")
+		MP.GAME.pvp_unstuck_attempted = true
+		if G.FUNCS.mp_unstuck_blind then
+			G.FUNCS.mp_unstuck_blind()
 		end
-		
-	-- Also reset the flag when leaving PvP state
+	end
+
+	-- Reset the attempt flag once we are safely inside the PvP blind
+	if MP.GAME.pvp_unstuck_attempted and MP.is_pvp_boss() then
+		MP.GAME.pvp_unstuck_attempted = false
+	end
+
+	-- Reset pvp_blind_started when leaving PvP state
 	if MP.LOBBY.code and not MP.is_pvp_boss() and MP.GAME.pvp_blind_started then
 		MP.GAME.pvp_blind_started = false
 	end
-
 
 	return _disconnect_gupdate(self, dt)
 end
@@ -270,7 +280,8 @@ local function action_start_blind()
 	MP.GAME.ready_blind = false
 	MP.GAME.timer_started = false
 	MP.GAME.timer = MP.LOBBY.config.timer_base_seconds
-	MP.GAME.pvp_blind_started = true 
+	MP.GAME.pvp_blind_started = true
+	MP.GAME.pvp_unstuck_attempted = false
 
 	if MP.GAME.stuck_outside_pvp then
 		MP.GAME.stuck_outside_pvp = nil

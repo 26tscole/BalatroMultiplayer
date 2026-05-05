@@ -17,6 +17,10 @@ local function create_player_info_row(player, player_type, text_scale)
 			scale = text_scale * 0.8,
 			colour = G.C.UI.TEXT_LIGHT,
 		}),
+		MP.UI.UTILS.create_text_node(role_label, {
+			scale = text_scale * 0.6,
+			colour = G.C.UI.TEXT_LIGHT,
+		}),
 		MP.UI.UTILS.create_blank(0.1, 0.1),
 		player.hash and UIBox_button({
 			id = player_type .. "_hash",

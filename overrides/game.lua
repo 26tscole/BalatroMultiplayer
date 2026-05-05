@@ -18,24 +18,28 @@ function Card:sell_card()
 		return
 	end
 
-	if self.ability and self.ability.name then
-		sendTraceMessage(
-			string.format("Client sent message: action:soldCard,card:%s", self.ability.name),
-			"MULTIPLAYER"
-		)
-	end
+	if self.mp_end_game_display then
+        return
+    end
+
+    if self.ability and self.ability.name then
+        sendTraceMessage(
+            string.format("Client sent message: action:soldCard,card:%s", self.ability.name),
+            "MULTIPLAYER"
+        )
+    end
 
 	return sell_card_ref(self)
 end
 
 
-local can_sell_ref = Card.can_sell
-function Card:can_sell(...)
+local can_sell_ref = Card.can_sell_card
+function Card:can_sell_card(...)
     if self.mp_end_game_display then
         return false
     end
 
-    return can_sell_ref(self, ...)
+    return can_sell_card_ref(self, ...)
 end
 
 local reroll_shop_ref = G.FUNCS.reroll_shop

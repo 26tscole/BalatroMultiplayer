@@ -1,3 +1,22 @@
+## Issues solved and how to test them:
+
+
+- Issue #147 - Make more explicit when a player has pressed the “Return to Lobby” button
+- Test:
+- Issue #277 - You can sell opponent jokers in the game over screen 
+- Test: Load up a multiplayer game, set to Standard. Set lives to 1. Play until each player gets a Joker, and then get a gameover. If you click on an opponent's joker and the "sell" graphic is greyed out, this test was successful.
+- Issue #172 - Possible softlock / issue with max lives or some other setting
+- Test:
+- Issue #352 - Bug: changing multiplayer settings crash
+- Test: Try to change multiplayer settings mid-game in the Mods menu. If a message pops up that says "Multiplayer settings cannot be changed during a match." then this test was successful.
+- Issue #320 - Error: Failed to parse message
+- Test:
+- Issue #245 - Different Tags with same seed
+- Test:
+- Issue #370 - Creating lobby has no host
+- Test:
+
+
 # Balatro Multiplayer Mod
 
 ![ModIcon](https://github.com/Balatro-Multiplayer/BalatroMultiplayer/blob/2cd9015963c1118e0b849f11e7c335f97b74f36c/assets/2x/modicon.png)

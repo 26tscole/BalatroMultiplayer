@@ -12,7 +12,7 @@
 - Issue #320 - Error: Failed to parse message
 - Test:
 - Issue #245 - Different Tags with same seed
-- Test:
+- Test:Play through several blinds/antes and confirm the same tag appears in the same blind slot for both players every time.
 - Issue #370 - Creating lobby has no host
 - Test:
 

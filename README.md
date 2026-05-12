@@ -2,7 +2,7 @@
 
 
 - Issue #147 - Make more explicit when a player has pressed the “Return to Lobby” button
-- Test:
+- Test: Load up a multiplayer game, and have one player exit mid-match. If text pops up saying "Opponent has left the lobby," this test was successful
 - Issue #277 - You can sell opponent jokers in the game over screen 
 - Test: Load up a multiplayer game, set to Standard. Set lives to 1. Play until each player gets a Joker, and then get a gameover. If you click on an opponent's joker and the "sell" graphic is greyed out, this test was successful.
 - Issue #172 - Possible softlock / issue with max lives or some other setting
@@ -14,7 +14,7 @@
 - Issue #245 - Different Tags with same seed
 - Test: Play through several blinds/antes and confirm the same tag appears in the same blind slot for both players every time.
 - Issue #370 - Creating lobby has no host
-- Test:
+- Test: Create a lobby and invite someone. If the players have (Host) and (Guest) next to them, this test was successful.
 
 
 # Balatro Multiplayer Mod

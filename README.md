@@ -10,7 +10,7 @@
 - Issue #352 - Bug: changing multiplayer settings crash
 - Test: Try to change multiplayer settings mid-game in the Mods menu. If a message pops up that says "Multiplayer settings cannot be changed during a match." then this test was successful.
 - Issue #320 - Error: Failed to parse message
-- Test:
+- Test: (issue tested automatically in github actions)
 - Issue #245 - Different Tags with same seed
 - Test: Play through several blinds/antes and confirm the same tag appears in the same blind slot for both players every time.
 - Issue #370 - Creating lobby has no host

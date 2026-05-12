@@ -6,7 +6,7 @@
 - Issue #277 - You can sell opponent jokers in the game over screen 
 - Test: Load up a multiplayer game, set to Standard. Set lives to 1. Play until each player gets a Joker, and then get a gameover. If you click on an opponent's joker and the "sell" graphic is greyed out, this test was successful.
 - Issue #172 - Possible softlock / issue with max lives or some other setting
-- Test:
+- Test: Load into a multiplayer match, Start the game and skip the blinds to the wanted PvP Blind, Click Ready. If one player is inside pvp and the another isn't the game will now automatically unstuck the player, If any player is automatically unstucked then this test was successful.
 - Issue #352 - Bug: changing multiplayer settings crash
 - Test: Try to change multiplayer settings mid-game in the Mods menu. If a message pops up that says "Multiplayer settings cannot be changed during a match." then this test was successful.
 - Issue #320 - Error: Failed to parse message
